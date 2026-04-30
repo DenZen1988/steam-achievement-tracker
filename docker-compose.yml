@@ -1,0 +1,11 @@
+services:
+  steam-achievement-tracker:
+    build: .
+    env_file:
+      - .env
+    container_name: steam-achievement-tracker
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    restart: always

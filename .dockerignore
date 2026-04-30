@@ -1,0 +1,7 @@
+__pycache__/
+.venv/
+.git/
+.nicegui/
+steam_achievements.db
+.env
+uv.lock
