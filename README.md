@@ -42,7 +42,7 @@ port differently in the `docker-compose.yml`.
 
 ### Known Limitations
 
-> [!WARNING] Steam Rate Limiting
+> [!WARNING]
 > Be aware that the steam api has a rate limiting og 100k requests per day!
 > This might affect you if you have an extreme steam library (10k+ games) or if you setup the sync interval too frequently.
 
