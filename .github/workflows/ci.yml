@@ -1,0 +1,66 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main, master, default, devel]
+  pull_request:
+    branches: [main, master, default]
+  schedule:
+    # Weekly on Sundays to catch upstream breakage
+    - cron: "0 2 * * 0" 
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  markdownlint:
+    name: Markdown-Lint
+    runs-on: [self-hosted, linux, x64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Install markdownlint
+        run: |
+          sudo npm install -g markdownlint-cli
+      - name: Run markdownlint
+        run: markdownlint .
+  python-lint:
+    name: Python Lint
+    runs-on: [self-hosted, linux, x64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Install Python Linting Tools
+        run: |
+          sudo apt-get update && sudo apt-get install -y pylint
+      - name: Run Python Lint
+        run: find . -type f -name "*.py" -exec pylint {} \;
+  spellcheck:
+    name: Spelling Check
+    runs-on: [self-hosted, linux, x64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Install codespell
+        run: |
+          sudo apt-get update && sudo apt-get install -y codespell
+      - name: Run codespell
+        run: codespell .
+
+  ci-pass:
+    name: CI Pass
+    runs-on: [self-hosted, linux, x64]
+    needs: [markdownlint, python-lint, spellcheck]
+    steps:
+      - name: Check Results
+        run: |
+          if [[ "${{ needs.markdownlint.result }}" != 'success' ]] || \
+          [[ "${{ needs.python-lint.result }}" != 'success' ]] || \
+          [[ "${{ needs.spellcheck.result }}" != 'success' ]]; then
+            echo "::error::One or more jobs failed"
+            exit 1
+          fi
+          echo "All checks passed successfully!"
